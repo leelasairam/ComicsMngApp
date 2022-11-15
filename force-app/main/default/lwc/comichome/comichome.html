@@ -1,0 +1,158 @@
+<template>
+    <div>
+        <lightning-layout multiple-rows>
+            <lightning-layout-item size="3" padding="around-small">
+                <div style="margin-bottom: 1rem;">
+                    <lightning-card>
+                        <p slot="title"><lightning-icon size="x-small" icon-name="action:filter"></lightning-icon> Comics</p>
+                        <lightning-button label="Apply" onclick={Filter} slot="actions" style="margin-right: 0.2rem;"></lightning-button>
+                        <lightning-button label="Reset" onclick={ResetFilters} variant="destructive-text" slot="actions"></lightning-button>
+                        <div style="padding: 0.5rem;">
+                            <lightning-combobox
+                            label="Genre"
+                            options={Genres}
+                            onchange={handleGenre} class="genre"></lightning-combobox>
+                            <lightning-combobox
+                            label="Language"
+                            options={Languages}
+                            onchange={handleLanguage} class="language"></lightning-combobox>
+                            <lightning-input placeholder="2022" onchange={handleYear} label="Year" class="year"></lightning-input>
+                        </div>
+                    </lightning-card>
+                </div>
+
+                <lightning-card>
+                    <p slot="title"><lightning-icon size="x-small" icon-name="action:check"></lightning-icon> Transactions</p>
+                    <div style="padding: 0.3rem;">
+                        <lightning-layout>
+                            <lightning-layout-item size="auto">
+                                <lightning-input padding="around-small" class="transaction-search" variant="label-hidden" placeholder="Transaction Number..."></lightning-input>
+                            </lightning-layout-item>
+                            <lightning-layout-item size="auto">
+                                <lightning-button onclick={SearchTransaction} style="margin-left: 0.2rem;" variant="brand" label="FIND"></lightning-button>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    </div>
+                    <div style="max-height: 500px;overflow-y: scroll;">
+                        <template for:each={Transactions} for:item="i">
+                            <div key={i.Id} style="margin-bottom: 0.5rem;">
+                                <lightning-card>
+                                    <lightning-button if:false={i.IsReturned__c} onclick={ChangeTransactionStatus} slot="actions" data-tid={i.Id} label="Return"></lightning-button>
+                                    <lightning-button if:true={i.IsReturned__c} slot="actions" variant="success" label="Returned"></lightning-button>
+                                    <p slot="title">{i.Name}</p>
+                                    <div style="padding-left: 0.5rem;">
+                                        <p style="font-weight: 600;"><lightning-icon size="x-small" icon-name="utility:user"></lightning-icon>{i.Comic_User__r.Name__c}</p>
+                                        <p style="font-weight: 600;"><lightning-icon size="x-small" icon-name="utility:notebook"></lightning-icon>{i.Comic__r.comic__c}</p>
+                                        <p>Last Modified : {i.LastModifiedDate}</p>
+                                        <p>Created : {i.CreatedDate}</p>
+                                    </div>
+                                </lightning-card>
+                            </div>
+                        </template>
+                    </div>
+                </lightning-card>
+
+            </lightning-layout-item>
+            <lightning-layout-item size="6" padding="around-small">
+                <!--Modal-->
+                <template if:true={Modal}>
+                    <!-- Modal/Popup Box LWC starts here -->
+                    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                        <div class="slds-modal__container">
+                            <!-- Modal/Popup Box LWC header here -->
+                            <header class="slds-modal__header">
+                                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={HideModal}>
+                                    <lightning-icon icon-name="utility:close"
+                                        alternative-text="close"
+                                        variant="inverse"
+                                        size="small" ></lightning-icon>
+                                    <span class="slds-assistive-text">Close</span>
+                                </button>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Borrow Comic</h2>
+                            </header>
+                            <!-- Modal/Popup Box LWC body starts here -->
+                            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                                <div>
+                                    <lightning-record-edit-form object-api-name="Comic_Transaction__c" onsuccess={ChangeComicQuantity}>
+                                        <div>
+                                            <lightning-messages> </lightning-messages>
+                                            <lightning-input-field field-name="Comic_User__c"> </lightning-input-field>
+                                            <lightning-input-field field-name="Comic__c" value={ComicId}> </lightning-input-field>
+                                            <lightning-input-field style="display: none;" field-name="Status__c" value="Borrowed"> </lightning-input-field>
+                                            <div style="text-align: center;margin-top:0.5rem">
+                                                <lightning-button class="slds-m-top_small" type="submit" label="Submit" variant="brand"></lightning-button>
+                                                <button style="margin-left: 0.5rem;" class="slds-button slds-button_neutral" onclick={HideModal} title="Cancel">Cancel</button>
+                                            </div>
+                                        </div>
+                                    </lightning-record-edit-form>
+                                </div>
+                            </div>
+                            <!-- Modal/Popup Box LWC footer starts here -->
+                            <footer class="slds-modal__footer">
+                                
+                            </footer>
+                        </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </template>
+
+                <div>
+                    <div style="border-style:ridge; border-color:rgb(241, 237, 237); border-radius:8px">
+                        <lightning-layout>
+                            <lightning-layout-item size="10" padding="around-small">
+                                <lightning-input variant="label-hidden" class="comic-search" placeholder="Search Comic..."></lightning-input>
+                            </lightning-layout-item>
+                            <lightning-layout-item size="2" padding="around-small">
+                                <lightning-button onclick={SearchComics} variant="brand" label="Search"></lightning-button>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    </div><br/>
+                    <div style="max-height: 800px;overflow-y: scroll;">
+                        <template for:each={Comics} for:item="i">
+                            <div key={i.id} style="margin-bottom: 0.5rem;">
+                                <lightning-card  title={i.comic__c}>
+                                    <lightning-button if:true={i.Availability__c} label="Borrow" slot="actions" data-cid={i.Id} onclick={ShowModal}></lightning-button>
+                                    <lightning-button if:false={i.Availability__c} label="Currently Unavailable" slot="actions" variant="destructive-text"></lightning-button>
+                                    <p class="slds-p-horizontal_small"><b style="color: rgb(66, 46, 46);">Genre : </b>{i.category__c} &nbsp; &nbsp; <b style="color: rgb(66, 50, 91);">Language : </b>{i.language__c} ({i.Quantity__c})</p>
+                                    <p slot="footer">Published on {i.released__c} &nbsp;|&nbsp; Written by {i.written__c}</p>
+                                </lightning-card>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="3" padding="around-small">
+                <div>
+                    <lightning-card>
+                        <p slot="title"><lightning-icon size="x-small" icon-name="action:new_group"></lightning-icon> Users</p>
+                        <div>
+                            <lightning-layout>
+                                <lightning-layout-item flexibility="auto" padding="around-small">
+                                    <lightning-input variant="label-hidden" class="user-search" placeholder="Search User..."></lightning-input>
+                                </lightning-layout-item>
+                                <lightning-layout-item flexibility="auto" padding="around-small">
+                                    <lightning-button onclick={SearchUser} label="Search"></lightning-button>
+                                </lightning-layout-item>
+                            </lightning-layout>
+
+                            <div style="max-height: 750px;overflow-y: scroll;">
+                                <template for:each={Users} for:item="i">
+                                    <div key={i.id} style="margin-bottom:0.3rem;border-style:outset; border-radius:5px;">
+                                        <lightning-card  title={i.Name__c}>
+                                            <p class="slds-p-horizontal_small"><lightning-icon size="x-small" icon-name="utility:call"></lightning-icon>{i.Phone__c}</p>
+                                            <p class="slds-p-horizontal_small"><lightning-icon size="x-small" icon-name="utility:checkin"></lightning-icon>{i.Address__c}</p>
+                                            <lightning-button label="Fetch Borrowed Comics" data-uid={i.Id} onclick={GetUserTransactions} slot="footer" variant="base"></lightning-button>
+                                        </lightning-card>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </lightning-card>
+                </div>
+            </lightning-layout-item>
+        </lightning-layout>
+        <div if:true={load}>
+            <lightning-spinner variant="brand" alternative-text="Loading" size="medium"></lightning-spinner>
+        </div>
+    </div>
+</template>
