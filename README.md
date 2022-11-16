@@ -1,29 +1,3 @@
-## To open model
-
-```javascript
-ChangeComicQuantity(){
-        ChangeQuantity({TID:this.ComicId})
-        .then(result => {
-            console.log("Updated");
-            this.GetComicRecords();
-        })
-        .catch(error => {
-            console.log(error);
-        });
-        this.Toast = {title : "Success!",messsage : "Borrowed Successfully",varient : "success"};
-        this.HideModal();
-        const event = new ShowToastEvent({
-            title: "Success",
-            message: "comic borrowed successfully",
-            variant: "success",
-            mode: 'dismissable'
-        });
-        this.dispatchEvent(event);
-    }
- ```
-
-
-
 
 # Salesforce DX Project: Next Steps
 
