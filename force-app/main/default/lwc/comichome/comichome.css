@@ -1,0 +1,6 @@
+.trns-green{
+    --slds-c-card-color-background : rgb(165, 229, 165);
+}
+.trns-white{
+    --slds-c-card-color-background : white;
+}

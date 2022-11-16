@@ -21,7 +21,7 @@
                     </lightning-card>
                 </div>
 
-                <lightning-card>
+                <lightning-card class={trnsclass}>
                     <p slot="title"><lightning-icon size="x-small" icon-name="action:check"></lightning-icon> Transactions</p>
                     <div style="padding: 0.3rem;">
                         <lightning-layout>
@@ -151,8 +151,9 @@
                 </div>
             </lightning-layout-item>
         </lightning-layout>
-        <div if:true={load}>
-            <lightning-spinner variant="brand" alternative-text="Loading" size="medium"></lightning-spinner>
-        </div>
+    </div>
+
+    <div if:true={load}>
+        <lightning-spinner class="slds-is-fixed" variant="brand" alternative-text="Loading" size="medium"></lightning-spinner>
     </div>
 </template>

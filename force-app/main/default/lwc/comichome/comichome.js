@@ -11,6 +11,7 @@ export default class Comichome extends LightningElement {
     @track Users=[];
     @track Transactions=[];
     @track Modal=false;
+    @track trnsclass = "trns-white";
     @track ComicId;
     @track Comic_Query = 'SELECT Id, category__c, comic__c, country__c, Name, language__c, Quantity__c, Availability__c, written__c, released__c, Year__c FROM Comic__c WHERE Availability__c=true ORDER BY CreatedDate DESC LIMIT 10';
     @track Basic_ComicQuery = 'SELECT Id, category__c, comic__c, country__c, Name, language__c, Quantity__c, Availability__c, written__c, released__c, Year__c FROM Comic__c';
@@ -146,6 +147,10 @@ export default class Comichome extends LightningElement {
         let UserId = event.target.dataset.uid;
         this.Transaction_Query = `SELECT Id,IsReturned__c, Name, Comic__r.comic__c,Comic_User__r.Name__c,Status__c,LastModifiedDate, CreatedDate FROM Comic_Transaction__c WHERE Comic_User__c = \'${UserId}\' AND Status__c = \'Borrowed\' ORDER BY CreatedDate DESC`;
         this.GetTransactionRecords();
+        this.trnsclass = "trns-green";
+        setTimeout(()=>{
+            this.trnsclass = "trns-white";
+        },2000);
     }
 
     ChangeTransactionStatus(event){
